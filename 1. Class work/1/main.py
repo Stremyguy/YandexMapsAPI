@@ -45,7 +45,7 @@ class MainWindow(QMainWindow):
         self.pixmap = QPixmap(f"data/tmp/{self.map_file}")
         self.map_template.setPixmap(self.pixmap)
     
-    def closeEvent(self, event) -> None:
+    def closeEvent(self, event: None) -> None:
         os.remove(f"data/tmp/{self.map_file}")
 
 

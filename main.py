@@ -43,10 +43,10 @@ class MainWindow(QMainWindow):
         
         self.map_file = "map.png"
         
-        with open(f"data/tmp/{self.map_file}", "wb") as file:
+        with open(f"data/{self.map_file}", "wb") as file:
             file.write(response.content)
         
-        self.pixmap = QPixmap(f"data/tmp/{self.map_file}")
+        self.pixmap = QPixmap(f"data/{self.map_file}")
         self.map_template.setPixmap(self.pixmap)
     
     def keyPressEvent(self, event: None) -> None:
@@ -58,7 +58,7 @@ class MainWindow(QMainWindow):
         self.search()
         
     def closeEvent(self, event: None) -> None:
-        os.remove(f"data/tmp/{self.map_file}")
+        os.remove(f"data/{self.map_file}")
 
 
 if __name__ == "__main__":

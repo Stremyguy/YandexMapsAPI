@@ -14,6 +14,7 @@ class MainWindow(QMainWindow):
         uic.loadUi("data/main.ui", self)
         
         self.searchButton.clicked.connect(self.search)
+        self.theme_comboBox.currentTextChanged.connect(self.toggle_theme)
         
         self.setup()
         self.search()
@@ -32,6 +33,18 @@ class MainWindow(QMainWindow):
         
         self.lon_lineEdit.setText("-96.839074")
         self.lat_lineEdit.setText("39.767235")
+        
+        self.current_theme = "light"
+    
+    def toggle_theme(self) -> None:
+        theme = self.theme_comboBox.currentText()
+        
+        if theme == "Темная":
+            self.current_theme = "dark"
+        else:
+            self.current_theme = "light"
+        
+        self.search()
     
     def search(self) -> None:
         self.server_address = "https://static-maps.yandex.ru/v1?"
@@ -49,14 +62,19 @@ class MainWindow(QMainWindow):
         
         spn = max(0.001, min(spn, 90.0))
         
-        ll_spn = f"ll={lon},{lat}&spn={spn},{spn}"
-        map_request = f"{self.server_address}{ll_spn}&apikey={self.api_key}"
+        params = {
+            "ll": f"{lon},{lat}",
+            "spn": f"{spn},{spn}",
+            "apikey": self.api_key,
+            "l": "map",
+        }
+        if self.current_theme == "dark":
+            params["theme"] = "dark"
         
-        response = requests.get(map_request)
+        response = requests.get("https://static-maps.yandex.ru/1.x/", params=params)
         
         if not response.ok:
             print("Ошибка выполнения запроса:")
-            print(map_request)
             print(f"HTTP статус: {response.status_code} ({response.reason})")
             print(f"Response: {response.text}")
             return

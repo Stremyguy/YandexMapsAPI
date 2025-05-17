@@ -164,6 +164,46 @@
      <double>1.000000000000000</double>
     </property>
    </widget>
+   <widget class="QLabel" name="theme_label">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>100</y>
+      <width>81</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Тема:</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="theme_comboBox">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>100</y>
+      <width>151</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>Светлая</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Темная</string>
+     </property>
+    </item>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

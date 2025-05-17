@@ -130,7 +130,7 @@
       <x>260</x>
       <y>50</y>
       <width>600</width>
-      <height>401</height>
+      <height>351</height>
      </rect>
     </property>
     <property name="text">
@@ -207,9 +207,9 @@
    <widget class="QLineEdit" name="object_lineEdit">
     <property name="geometry">
      <rect>
-      <x>270</x>
+      <x>260</x>
       <y>10</y>
-      <width>471</width>
+      <width>481</width>
       <height>22</height>
      </rect>
     </property>
@@ -242,6 +242,49 @@
     </property>
     <property name="text">
      <string>Поиск</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="resetButton">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>400</y>
+      <width>221</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>10</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">.QPushButton {
+	background-color: #ccc;
+	border-radius: 10px;
+}</string>
+    </property>
+    <property name="text">
+     <string>Сброс поиск. результата</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="addressLine">
+    <property name="geometry">
+     <rect>
+      <x>260</x>
+      <y>410</y>
+      <width>571</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
     </property>
    </widget>
   </widget>

@@ -14,9 +14,10 @@ class MainWindow(QMainWindow):
         
         self.searchButton.clicked.connect(self.search)
         self.theme_comboBox.currentTextChanged.connect(self.toggle_theme)
-        
+
         self.searchButton_2.clicked.connect(self.search_object)
         self.object_lineEdit.returnPressed.connect(self.search_object)
+        self.resetButton.clicked.connect(self.reset_search)
         
         self.setup()
         self.search()
@@ -38,10 +39,17 @@ class MainWindow(QMainWindow):
         
         self.current_theme = "light"
         self.current_marker = None
+        self.current_address = ""
     
     def toggle_theme(self) -> None:
         theme = self.theme_comboBox.currentText()
         self.current_theme = "dark" if theme == "Темная" else "light"
+        self.search()
+    
+    def reset_search(self) -> None:
+        self.current_marker = None
+        self.current_address = ""
+        self.addressLine.setText("")
         self.search()
     
     def search_object(self) -> None:
@@ -60,16 +68,20 @@ class MainWindow(QMainWindow):
             response = requests.get(geocoder_api, params=params)
             if response.ok:
                 data = response.json()
+                
                 feature = data["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]
                 pos = feature["Point"]["pos"]
                 lon, lat = map(float, pos.split())
                 
+                self.current_address = feature["metaDataProperty"]["GeocoderMetaData"]["text"]
+                
                 self.lon_lineEdit.setText(f"{lon:.6f}")
                 self.lat_lineEdit.setText(f"{lat:.6f}")
+                self.addressLine.setText(self.current_address)
                 self.current_marker = (lon, lat)
                 self.search()
         except Exception as e:
-            print(f"Ошибка геокодинга: {e}")
+            print(f"Ошибка геокодирования: {e}")
     
     def search(self) -> None:
         try:

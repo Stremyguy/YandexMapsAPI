@@ -128,9 +128,9 @@
     <property name="geometry">
      <rect>
       <x>260</x>
-      <y>0</y>
+      <y>50</y>
       <width>600</width>
-      <height>451</height>
+      <height>401</height>
      </rect>
     </property>
     <property name="text">
@@ -203,6 +203,46 @@
       <string>Темная</string>
      </property>
     </item>
+   </widget>
+   <widget class="QLineEdit" name="object_lineEdit">
+    <property name="geometry">
+     <rect>
+      <x>270</x>
+      <y>10</y>
+      <width>471</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="searchButton_2">
+    <property name="geometry">
+     <rect>
+      <x>750</x>
+      <y>10</y>
+      <width>81</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>10</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">.QPushButton {
+	background-color: #16C47F;
+	border-radius: 10px;
+}</string>
+    </property>
+    <property name="text">
+     <string>Поиск</string>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

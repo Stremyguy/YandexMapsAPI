@@ -1,7 +1,6 @@
 import os
 import sys
 import requests
-
 from PyQt6 import uic
 from PyQt6.QtWidgets import QApplication, QMainWindow
 from PyQt6.QtGui import QPixmap
@@ -15,6 +14,9 @@ class MainWindow(QMainWindow):
         
         self.searchButton.clicked.connect(self.search)
         self.theme_comboBox.currentTextChanged.connect(self.toggle_theme)
+        
+        self.searchButton_2.clicked.connect(self.search_object)
+        self.object_lineEdit.returnPressed.connect(self.search_object)
         
         self.setup()
         self.search()
@@ -35,21 +37,41 @@ class MainWindow(QMainWindow):
         self.lat_lineEdit.setText("39.767235")
         
         self.current_theme = "light"
+        self.current_marker = None
     
     def toggle_theme(self) -> None:
         theme = self.theme_comboBox.currentText()
-        
-        if theme == "Темная":
-            self.current_theme = "dark"
-        else:
-            self.current_theme = "light"
-        
+        self.current_theme = "dark" if theme == "Темная" else "light"
         self.search()
     
-    def search(self) -> None:
-        self.server_address = "https://static-maps.yandex.ru/v1?"
-        self.api_key = "f3a0fe3a-b07e-4840-a1da-06f18b2ddf13"
+    def search_object(self) -> None:
+        search_text = self.object_lineEdit.text().strip()
+        if not search_text:
+            return
         
+        geocoder_api = "https://geocode-maps.yandex.ru/1.x/"
+        params = {
+            "apikey": "8013b162-6b42-4997-9691-77b7074026e0",
+            "geocode": search_text,
+            "format": "json"
+        }
+        
+        try:
+            response = requests.get(geocoder_api, params=params)
+            if response.ok:
+                data = response.json()
+                feature = data["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]
+                pos = feature["Point"]["pos"]
+                lon, lat = map(float, pos.split())
+                
+                self.lon_lineEdit.setText(f"{lon:.6f}")
+                self.lat_lineEdit.setText(f"{lat:.6f}")
+                self.current_marker = (lon, lat)
+                self.search()
+        except Exception as e:
+            print(f"Ошибка геокодинга: {e}")
+    
+    def search(self) -> None:
         try:
             lon = float(self.lon_lineEdit.text())
             lat = float(self.lat_lineEdit.text())
@@ -59,17 +81,21 @@ class MainWindow(QMainWindow):
             return
         
         spn = 20.0 / zoom 
-        
         spn = max(0.001, min(spn, 90.0))
         
         params = {
             "ll": f"{lon},{lat}",
             "spn": f"{spn},{spn}",
-            "apikey": self.api_key,
+            "apikey": "f3a0fe3a-b07e-4840-a1da-06f18b2ddf13",
             "l": "map",
         }
+        
         if self.current_theme == "dark":
             params["theme"] = "dark"
+        
+        if self.current_marker:
+            marker_lon, marker_lat = self.current_marker
+            params["pt"] = f"{marker_lon},{marker_lat},pm2blm"
         
         response = requests.get("https://static-maps.yandex.ru/1.x/", params=params)
         
@@ -124,7 +150,6 @@ class MainWindow(QMainWindow):
         
         self.lon_lineEdit.setText(f"{lon:.6f}")
         self.lat_lineEdit.setText(f"{lat:.6f}")
-        
         self.search()
         
     def closeEvent(self, event: None) -> None:

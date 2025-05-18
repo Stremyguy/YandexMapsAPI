@@ -277,7 +277,7 @@ class MainWindow(QMainWindow):
             self.map_template.setPixmap(self.pixmap)
         except Exception as e:
             print(f"Ошибка при загрузке карты: {e}")
-    
+
     def keyPressEvent(self, event: None) -> None:
         if event.key() == Qt.Key.Key_PageUp:
             new_zoom = self.zoomSpinBox.value() - self.scale_step
@@ -285,15 +285,15 @@ class MainWindow(QMainWindow):
         elif event.key() == Qt.Key.Key_PageDown:
             new_zoom = self.zoomSpinBox.value() + self.scale_step
             self.zoomSpinBox.setValue(min(20, new_zoom))
-        
+
         try:
             lon = float(self.lon_lineEdit.text())
             lat = float(self.lat_lineEdit.text())
         except ValueError:
             return
-        
+
         move_step = self.move_step * (10 / self.zoomSpinBox.value())
-        
+
         if event.key() == Qt.Key.Key_Up:
             lat += move_step
             lat = min(lat, self.max_lat)
@@ -308,7 +308,7 @@ class MainWindow(QMainWindow):
             lon -= move_step
             if lon < self.min_lon:
                 lon = self.max_lon - (self.min_lon - lon)
-        
+
         self.lon_lineEdit.setText(f"{lon:.6f}")
         self.lat_lineEdit.setText(f"{lat:.6f}")
         self.search()

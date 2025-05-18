@@ -18,6 +18,7 @@ class MainWindow(QMainWindow):
         self.searchButton_2.clicked.connect(self.search_object)
         self.object_lineEdit.returnPressed.connect(self.search_object)
         self.resetButton.clicked.connect(self.reset_search)
+        self.postalCode_checkBox.stateChanged.connect(self.search_object)
         
         self.setup()
         self.search()
@@ -57,6 +58,8 @@ class MainWindow(QMainWindow):
         if not search_text:
             return
         
+        print(search_text)
+        
         geocoder_api = "https://geocode-maps.yandex.ru/1.x/"
         params = {
             "apikey": "8013b162-6b42-4997-9691-77b7074026e0",
@@ -74,6 +77,11 @@ class MainWindow(QMainWindow):
                 lon, lat = map(float, pos.split())
                 
                 self.current_address = feature["metaDataProperty"]["GeocoderMetaData"]["text"]
+                
+                if self.postalCode_checkBox.isChecked():
+                    postal_code = feature["metaDataProperty"]["GeocoderMetaData"]["Address"]["postal_code"]
+                    if postal_code:
+                        self.current_address = f"{postal_code}, {self.current_address}"
                 
                 self.lon_lineEdit.setText(f"{lon:.6f}")
                 self.lat_lineEdit.setText(f"{lat:.6f}")

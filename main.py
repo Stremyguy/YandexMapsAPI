@@ -20,6 +20,8 @@ class MainWindow(QMainWindow):
         self.resetButton.clicked.connect(self.reset_search)
         self.postalCode_checkBox.stateChanged.connect(self.search_object)
         
+        self.map_template.setMouseTracking(True)
+        
         self.setup()
         self.search()
     
@@ -52,6 +54,145 @@ class MainWindow(QMainWindow):
         self.current_address = ""
         self.addressLine.setText("")
         self.search()
+    
+    def mousePressEvent(self, event: None) -> None:
+        if event.button() == Qt.MouseButton.LeftButton:
+            pos = self.map_template.mapFrom(self, event.pos())
+            if self.map_template.rect().contains(pos):
+                self.handle_left_click(pos)
+        elif event.button() == Qt.MouseButton.RightButton:
+            pos = self.map_template.mapFrom(self, event.pos())
+            if self.map_template.rect().contains(pos):
+                self.handle_right_click(pos)
+    
+    def handle_left_click(self, pos: None) -> None:
+        try:
+            lon = float(self.lon_lineEdit.text())
+            lat = float(self.lat_lineEdit.text())
+            zoom = float(self.zoomSpinBox.value())
+        except ValueError:
+            return
+        
+        width = self.map_template.width()
+        height = self.map_template.height()
+        
+        spn = 20.0 / zoom
+        lon_per_pixel = spn * 2 / width
+        lat_per_pixel = spn * 2 / height
+        
+        click_x = pos.x()
+        click_y = pos.y()
+        
+        center_x = width / 2
+        center_y = height / 2
+        
+        delta_lon = (click_x - center_x) * lon_per_pixel
+        delta_lat = (center_y - click_y) * lat_per_pixel
+        
+        click_lon = lon + delta_lon
+        click_lat = lat + delta_lat
+        
+        self.lon_lineEdit.setText(f"{click_lon:.6f}")
+        self.lat_lineEdit.setText(f"{click_lat:.6f}")
+        
+        self.current_marker = (click_lon, click_lat)
+        self.search_object_by_coords(click_lon, click_lat)
+    
+    def handle_right_click(self, pos: None) -> None:
+        try:
+            lon = float(self.lon_lineEdit.text())
+            lat = float(self.lat_lineEdit.text())
+            zoom = float(self.zoomSpinBox.value())
+        except ValueError:
+            return
+
+        width = self.map_template.width()
+        height = self.map_template.height()
+        
+        spn = 20.0 / zoom
+        lon_per_pixel = spn * 2 / width
+        lat_per_pixel = spn * 2 / height
+
+        click_x = pos.x()
+        click_y = pos.y()
+        
+        center_x = width / 2
+        center_y = height / 2
+        
+        delta_lon = (click_x - center_x) * lon_per_pixel
+        delta_lat = (center_y - click_y) * lat_per_pixel
+        
+        click_lon = lon + delta_lon
+        click_lat = lat + delta_lat
+
+        self.search_organization(click_lon, click_lat)
+    
+    def search_organization(self, lon: float, lat: float) -> None:
+        search_api_server = "https://search-maps.yandex.ru/v1/"
+        api_key = "dda3ddba-c9ea-4ead-9010-f43fbc15c6e3"
+        
+        search_params = {
+            "apikey": api_key,
+            "text": "",
+            "lang": "ru_RU",
+            "ll": f"{lon},{lat}",
+            "spn": "0.0005,0.0005",
+            "type": "biz",
+            "results": 1
+        }
+        
+        try:
+            response = requests.get(search_api_server, params=search_params)
+            if response.ok:
+                data = response.json()
+                if data.get("features"):
+                    organization = data["features"][0]
+                    org_name = organization["properties"]["CompanyMetaData"]["name"]
+                    org_address = organization["properties"]["CompanyMetaData"]["address"]
+                    
+                    org_pos = organization["geometry"]["coordinates"]
+                    org_lon, org_lat = org_pos[0], org_pos[1]
+
+                    distance = ((org_lon - lon) ** 2 + (org_lat - lat) ** 2) ** 0.5 * 111320
+                    
+                    if distance <= 50:
+                        self.current_marker = (org_lon, org_lat)
+                        self.current_address = f"{org_name}, {org_address}"
+                        self.addressLine.setText(self.current_address)
+                        self.search()
+                    else:
+                        self.reset_search()
+                else:
+                    self.reset_search()
+        except Exception as e:
+            print(f"Ошибка поиска организации: {e}")
+            self.reset_search()
+    
+    def search_object_by_coords(self, lon: float, lat: float) -> None:
+        geocoder_api = "https://geocode-maps.yandex.ru/1.x/"
+        params = {
+            "apikey": "8013b162-6b42-4997-9691-77b7074026e0",
+            "geocode": f"{lon},{lat}",
+            "format": "json"
+        }
+        
+        try:
+            response = requests.get(geocoder_api, params=params)
+            if response.ok:
+                data = response.json()
+                
+                feature = data["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]
+                self.current_address = feature["metaDataProperty"]["GeocoderMetaData"]["text"]
+                
+                if self.postalCode_checkBox.isChecked():
+                    postal_code = feature["metaDataProperty"]["GeocoderMetaData"]["Address"].get("postal_code", "")
+                    if postal_code:
+                        self.current_address = f"{postal_code}, {self.current_address}"
+                
+                self.addressLine.setText(self.current_address)
+                self.search()
+        except Exception as e:
+            print(f"Ошибка геокодирования: {e}")
     
     def search_object(self) -> None:
         search_text = self.object_lineEdit.text().strip()
